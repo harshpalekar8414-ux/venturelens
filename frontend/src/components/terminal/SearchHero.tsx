@@ -1,33 +1,41 @@
 "use client";
 
-import { useState } from "react";
-import { Search, ArrowRight, Sparkles, Building2 } from "lucide-react";
+import React, { useState } from "react";
+import { Search, ArrowRight, Sparkles, Building2, Loader2, AlertCircle } from "lucide-react";
 
-export function SearchHero() {
+interface SearchHeroProps {
+  onSearch: (companyName: string) => void;
+  isLoading: boolean;
+  error?: string | null;
+}
+
+export function SearchHero({ onSearch, isLoading, error }: SearchHeroProps) {
   const [query, setQuery] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!query.trim()) return;
-    setIsSubmitting(true);
-    // In M0, research engine is not yet connected; simulate brief terminal response
-    setTimeout(() => {
-      setIsSubmitting(false);
-    }, 600);
+    if (!query.trim() || isLoading) return;
+    onSearch(query.trim());
+  };
+
+  const handleQuickSelect = (name: string) => {
+    setQuery(name);
+    if (!isLoading) {
+      onSearch(name);
+    }
   };
 
   const sampleCompanies = [
     "PostHog",
     "Cursor",
     "Modal Labs",
+    "Supabase",
     "Resend",
     "Perplexity",
-    "Supabase",
   ];
 
   return (
-    <div className="py-16 sm:py-24 text-center max-w-4xl mx-auto px-4">
+    <div className="py-12 sm:py-20 text-center max-w-4xl mx-auto px-4">
       {/* Badge */}
       <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-slate-900 border border-slate-800 text-xs font-mono text-slate-300 mb-8">
         <Sparkles className="h-3.5 w-3.5 text-sky-400" />
@@ -46,28 +54,65 @@ export function SearchHero() {
       </p>
 
       {/* Search Input Box */}
-      <form onSubmit={handleSubmit} className="max-w-2xl mx-auto mb-6">
+      <form onSubmit={handleSubmit} className="max-w-2xl mx-auto mb-4">
         <div className="relative flex items-center bg-terminal-card border border-terminal-border rounded-xl shadow-2xl p-1.5 focus-within:border-sky-500/70 focus-within:ring-2 focus-within:ring-sky-500/20 transition-all">
           <div className="pl-3.5 pr-2 text-slate-400">
-            <Search className="h-5 w-5" />
+            {isLoading ? (
+              <Loader2 className="h-5 w-5 animate-spin text-sky-400" />
+            ) : (
+              <Search className="h-5 w-5" />
+            )}
           </div>
           <input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Enter startup name, URL, or domain (e.g. posthog.com)..."
-            className="w-full bg-transparent text-white placeholder-slate-500 text-sm sm:text-base focus:outline-none py-2 px-1 font-mono"
+            disabled={isLoading}
+            placeholder="Enter startup name (e.g. PostHog, Cursor, Modal Labs)..."
+            className="w-full bg-transparent text-white placeholder-slate-500 text-sm sm:text-base focus:outline-none py-2 px-1 font-mono disabled:opacity-50"
           />
           <button
             type="submit"
-            disabled={isSubmitting}
-            className="flex items-center space-x-2 bg-sky-500 hover:bg-sky-400 text-slate-950 font-semibold px-4 sm:px-6 py-2.5 rounded-lg text-sm transition-colors disabled:opacity-70 font-mono flex-shrink-0"
+            disabled={isLoading || !query.trim()}
+            className="flex items-center space-x-2 bg-sky-500 hover:bg-sky-400 text-slate-950 font-semibold px-4 sm:px-6 py-2.5 rounded-lg text-sm transition-colors disabled:opacity-50 font-mono flex-shrink-0"
           >
-            <span>{isSubmitting ? "Analyzing..." : "Analyze Company"}</span>
-            <ArrowRight className="h-4 w-4" />
+            {isLoading ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span>Researching...</span>
+              </>
+            ) : (
+              <>
+                <span>Analyze Company</span>
+                <ArrowRight className="h-4 w-4" />
+              </>
+            )}
           </button>
         </div>
       </form>
+
+      {/* Error Message if any */}
+      {error && (
+        <div className="max-w-2xl mx-auto mb-6 p-3 rounded-lg bg-rose-950/60 border border-rose-800/80 text-rose-300 text-xs font-mono flex items-center justify-center space-x-2">
+          <AlertCircle className="h-4 w-4 text-rose-400 flex-shrink-0" />
+          <span>{error}</span>
+        </div>
+      )}
+
+      {/* Loading Terminal Indicator */}
+      {isLoading && (
+        <div className="max-w-xl mx-auto mb-8 p-4 rounded-xl bg-slate-900/90 border border-slate-800 text-xs font-mono text-left space-y-2 animate-pulse shadow-xl">
+          <div className="flex items-center space-x-2 text-sky-400">
+            <span className="h-2 w-2 rounded-full bg-sky-400 animate-ping" />
+            <span className="font-semibold">Executing Research Pipeline...</span>
+          </div>
+          <div className="text-slate-400 pl-4 space-y-1">
+            <p>• Discovering public web sources for {query || "startup"}...</p>
+            <p>• Extracting evidence snippets & verifying facts...</p>
+            <p>• Grounding Gemini 3.7 Flash analysis across 11 key sections...</p>
+          </div>
+        </div>
+      )}
 
       {/* Quick Prompts */}
       <div className="flex flex-wrap items-center justify-center gap-2 text-xs text-slate-400 font-mono">
@@ -78,8 +123,9 @@ export function SearchHero() {
           <button
             key={name}
             type="button"
-            onClick={() => setQuery(name)}
-            className="px-2.5 py-1 rounded bg-slate-900/80 border border-slate-800/80 hover:border-slate-700 hover:text-slate-200 text-slate-400 transition-colors"
+            disabled={isLoading}
+            onClick={() => handleQuickSelect(name)}
+            className="px-2.5 py-1 rounded bg-slate-900/80 border border-slate-800/80 hover:border-slate-700 hover:text-slate-200 text-slate-400 transition-colors disabled:opacity-50"
           >
             {name}
           </button>
