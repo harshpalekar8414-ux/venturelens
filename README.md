@@ -8,9 +8,24 @@ VentureLens transforms unstructured, multi-source web information into structure
 
 ## 1. Project Status
 
-- **Current Milestone:** **Milestone M0 — Project Infrastructure** (Completed)
-- **Status:** Foundations established. FastAPI backend, PostgreSQL 16 + pgvector container (with automated extension initialization), and Next.js 15 terminal frontend configured and verified.
-- **Next Milestone:** Milestone M1 — Backend Data Core & Alembic Models.
+## 1. Project Status
+
+## 1. Project Status
+
+- Current Milestone: MVP — Completed
+- Status: End-to-end startup research pipeline is operational. VentureLens can search public web sources, retrieve source content, extract structured evidence, analyze the company with Gemini, and generate a source-backed investment research report.
+- Completed:
+  - FastAPI backend
+  - PostgreSQL 16 + pgvector infrastructure
+  - Next.js 15 terminal frontend
+  - Web search integration
+  - Source retrieval and extraction
+  - Gemini structured company analysis
+  - Evidence/source references
+  - Investment thesis, bull/bear cases, risks, and due-diligence questions
+  - Backend test suite
+  - Frontend production build verification
+- Next Milestone: M1 — Persistent Data Core & Evidence Storage
 
 ---
 
